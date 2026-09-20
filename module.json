@@ -1,8 +1,8 @@
 {
   "id": "vtta-tokenizer",
-  "title": "Tokenizer",
-  "description": "Tiny yet capable in-game token editor",
-  "version": "VERSION",
+  "title": "Tokenizer States",
+  "description": "Foundry VTT tokenizer variation with named token states and a preview HUD",
+  "version": "5.0.3",
   "download": "https://github.com/Me0wX-LR/tokenizer-states/archive/refs/heads/main.zip",
   "manifest": "https://raw.githubusercontent.com/Me0wX-LR/tokenizer-states/main/module.json",
   "changelog": "https://github.com/Me0wX-LR/tokenizer-states/blob/main/CHANGELOG.md",
@@ -12,11 +12,13 @@
   },
   "authors": [
     {
+      "name": "Me0wX-LR",
+      "url": "https://github.com/Me0wX-LR/tokenizer-states"
+    },
+    {
       "name": "MrPrimate",
       "email": "jack@mrprimate.co.uk",
-      "url": "https://mrprimate.co.uk",
-      "patreon": "https://www.patreon.com/MrPrimate",
-      "discord": "https://discord.gg/WzPuRuDJVP"
+      "url": "https://mrprimate.co.uk"
     },
     {
       "name": "Sebastian Will",
@@ -54,9 +56,8 @@
       "name": "Português (Brasil)",
       "path": "lang/pt-BR.json"
     }
-
   ],
-  "esmodules": ["./dist/main.js"],
+  "esmodules": ["./src/index.js"],
   "styles": ["./css/default.css", "./css/tokenizer.css"],
   "packs": [],
   "url": "https://github.com/Me0wX-LR/tokenizer-states"

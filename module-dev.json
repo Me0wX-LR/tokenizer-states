@@ -4,9 +4,9 @@
   "title": "Tokenizer",
   "description": "Tiny yet capable in-game token editor",
   "version": "999.0.0",
-  "download": "",
-  "manifest": "https://raw.githubusercontent.com/MrPrimate/tokenizer/master/module-dev.json",
-  "changelog": "https://github.com/MrPrimate/tokenizer/blob/master/CHANGELOG.md",
+  "download": "https://github.com/Me0wX-LR/tokenizer-states/archive/refs/heads/main.zip",
+  "manifest": "https://raw.githubusercontent.com/Me0wX-LR/tokenizer-states/main/module.json",
+  "changelog": "https://github.com/Me0wX-LR/tokenizer-states/blob/main/CHANGELOG.md",
   "compatibility": {
     "minimum": "13",
     "verified": 13
@@ -49,5 +49,5 @@
   "esmodules": ["./src/index.js"],
   "styles": ["./css/default.css", "./css/tokenizer.css"],
   "packs": [],
-  "url": "https://github.com/mrprimate/tokenizer/"
+  "url": "https://github.com/Me0wX-LR/tokenizer-states"
 }
