@@ -63,7 +63,7 @@ export default class StateHud {
     event.preventDefault();
     event.stopPropagation();
 
-    const actor = TokenStates.getActor(token);
+    const actor = TokenStates.flagActor(token);
     const action = actionEl.dataset.action;
     const stateId = actionEl.dataset.stateId;
     const api = game.modules.get(CONSTANTS.MODULE_ID)?.api;
@@ -100,7 +100,7 @@ export default class StateHud {
 
   static onRenderTokenHUD(hud, html) {
     const token = hud.object ?? hud.token;
-    const actor = TokenStates.getActor(token);
+    const actor = TokenStates.flagActor(token);
     if (!token || !actor || !TokenStates.canSwitch(token)) return;
     if (actor.prototypeToken?.randomImg) return;
 
