@@ -79,6 +79,16 @@ export default class StateHud {
       return;
     }
 
+    if (action === "delete") {
+      if (TokenStates.isDefault(stateId)) return;
+      const state = TokenStates.getState(actor, stateId, token);
+      const confirmed = await TokenStates.confirmDelete(state.name);
+      if (!confirmed) return;
+      await TokenStates.deleteState(actor, stateId);
+      await this.open(hud, root, token);
+      return;
+    }
+
     if (action === "add" && api?.tokenizeDoc) {
       const name = await TokenStates.promptName();
       if (!name) return;

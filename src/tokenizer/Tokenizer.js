@@ -687,10 +687,7 @@ export default class Tokenizer extends HandlebarsApplicationMixin(ApplicationV2)
   static async deleteTokenState(event) {
     event.preventDefault();
     if (!this.tokenOptions.actor || TokenStates.isDefault(this.tokenOptions.stateId)) return;
-    const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: game.i18n.localize(`${CONSTANTS.MODULE_ID}.states.delete-title`) },
-      content: `<p>${game.i18n.format(`${CONSTANTS.MODULE_ID}.states.delete-confirm`, { name: this.tokenOptions.stateName })}</p>`,
-    });
+    const confirmed = await TokenStates.confirmDelete(this.tokenOptions.stateName);
     if (!confirmed) return;
     await TokenStates.deleteState(this.tokenOptions.actor, this.tokenOptions.stateId);
     await this.onStateSelect(TokenStates.DEFAULT_ID);

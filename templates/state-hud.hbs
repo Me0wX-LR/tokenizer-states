@@ -13,6 +13,13 @@
                 <i class="fas fa-pen"></i>
             </button>
             {{/if}}
+            {{#if ../canDelete}}
+            {{#unless isDefault}}
+            <button type="button" class="tokenizer-state-delete" data-action="delete" data-state-id="{{id}}" title="{{localize "vtta-tokenizer.states.delete"}}">
+                <i class="fas fa-trash"></i>
+            </button>
+            {{/unless}}
+            {{/if}}
         </div>
         {{/each}}
         {{#if canEdit}}

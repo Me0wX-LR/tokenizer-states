@@ -153,6 +153,13 @@ export default class TokenStates {
     return !game.settings.get(CONSTANTS.MODULE_ID, "disable-player");
   }
 
+  static async confirmDelete(name) {
+    return foundry.applications.api.DialogV2.confirm({
+      window: { title: game.i18n.localize(`${CONSTANTS.MODULE_ID}.states.delete-title`) },
+      content: `<p>${game.i18n.format(`${CONSTANTS.MODULE_ID}.states.delete-confirm`, { name })}</p>`,
+    });
+  }
+
   static async promptName({ title, value = "" } = {}) {
     const safeValue = foundry.utils.escapeHTML(value ?? "");
     return foundry.applications.api.DialogV2.prompt({
@@ -238,7 +245,7 @@ export default class TokenStates {
       update[`flags.${CONSTANTS.MODULE_ID}.${CONSTANTS.FLAG_KEYS.ACTIVE}`] = this.DEFAULT_ID;
     }
     await actorDoc.update(update);
-    this.refreshActorDisplays(actorDoc);
+    await this.refreshActorDisplays(actorDoc);
   }
 
   static async saveState(actor, data) {
@@ -271,7 +278,7 @@ export default class TokenStates {
     await actorDoc.update({
       [`flags.${CONSTANTS.MODULE_ID}.${CONSTANTS.FLAG_KEYS.ACTIVE}`]: state.id,
     });
-    this.refreshActorDisplays(actorDoc);
+    await this.refreshActorDisplays(actorDoc);
   }
 
   static hudData(token) {
@@ -286,6 +293,7 @@ export default class TokenStates {
         preview: state.token || state.avatar || fallback,
       })),
       canEdit: this.canUseTokenizer() && this.canSwitch(token),
+      canDelete: this.canSwitch(token),
       activeId,
     };
   }
@@ -327,6 +335,8 @@ export default class TokenStates {
     return texture;
   }
 
+  static originalRefreshMesh = null;
+
   static assignTexture(token, texture) {
     if (!token?.mesh || !texture) return;
     if (typeof token.mesh.setTexture === "function") {
@@ -334,15 +344,42 @@ export default class TokenStates {
     } else {
       token.mesh.texture = texture;
     }
+    if (typeof token.mesh.refresh === "function") token.mesh.refresh();
+  }
+
+  static async restoreDefaultMesh(token) {
+    const generation = (token._tokenizerStateGen || 0) + 1;
+    token._tokenizerStateGen = generation;
+    token._tokenizerAppliedSrc = null;
+
+    if (this.originalRefreshMesh) {
+      token._tokenizerSkipOverlay = true;
+      try {
+        this.originalRefreshMesh.call(token);
+      } finally {
+        token._tokenizerSkipOverlay = false;
+      }
+    }
+
+    const src = this.getDisplayTokenSrc(token);
+    if (!src) return;
+    try {
+      const texture = await this.loadTexture(src);
+      if (generation !== token._tokenizerStateGen || !texture) return;
+      this.assignTexture(token, texture);
+    } catch (error) {
+      logger.error("Failed to restore default token texture", error);
+    }
   }
 
   static async applyTokenDisplay(token) {
+    if (token?._tokenizerSkipOverlay) return;
     const actor = this.getActor(token);
     if (!token?.mesh || !actor) return;
 
     const activeId = this.getActiveId(actor);
     if (this.isDefault(activeId)) {
-      token._tokenizerAppliedSrc = null;
+      if (token._tokenizerAppliedSrc) await this.restoreDefaultMesh(token);
       return;
     }
 
@@ -368,14 +405,12 @@ export default class TokenStates {
     }
   }
 
-  static refreshActorDisplays(actor) {
+  static async refreshActorDisplays(actor) {
     const actorDoc = this.getActor(actor);
     if (!actorDoc) return;
 
     if (canvas.ready) {
-      for (const token of actorDoc.getActiveTokens(true)) {
-        this.applyTokenDisplay(token);
-      }
+      await Promise.all(actorDoc.getActiveTokens(true).map((token) => this.applyTokenDisplay(token)));
     }
 
     const apps = [
@@ -403,8 +438,10 @@ export default class TokenStates {
     const refresh = proto._refreshMesh;
     if (typeof refresh !== "function") return;
     proto._tokenizerStatesPatched = true;
+    this.originalRefreshMesh = refresh;
     proto._refreshMesh = function _refreshMesh(...args) {
       const result = refresh.apply(this, args);
+      if (this._tokenizerSkipOverlay) return result;
       TokenStates.applyTokenDisplay(this);
       return result;
     };
