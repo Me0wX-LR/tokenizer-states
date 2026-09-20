@@ -1,0 +1,1138 @@
+import Utils from "../libs/Utils.js";
+import logger from "../libs/logger.js";
+import View from "./View.js";
+import DirectoryPicker from "../libs/DirectoryPicker.js";
+import ImageBrowser from "../libs/ImageBrowser.js";
+import CONSTANTS from "../constants.js";
+import { TokenizerSaveLocations } from "../libs/TokenizerSaveLocations.js";
+import TokenStates from "./TokenStates.js";
+
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+
+export default class Tokenizer extends HandlebarsApplicationMixin(ApplicationV2) {
+
+  getOMFGFrames() {
+    if (game.settings.get(CONSTANTS.MODULE_ID, "disable-omfg-frames")) return [];
+    if (this.omfgFrames.length > 0) return this.omfgFrames;
+    logger.debug(`Checking for OMFG Token Frames files in...`);
+
+    ["normal", "desaturated"].forEach((version) => {
+      ["v2", "v3", "v4", "v7", "v12"].forEach((v) => {
+        for (let i = 1; i <= 8; i++) {
+          const fileName = `modules/vtta-tokenizer/img/omfg/${version}/${v}/OMFG_Tokenizer_${v}_0${i}.png`;
+          const label = `OMFG ${game.i18n.localize("vtta-tokenizer.label.Frame")} ${v} 0${i}`;
+          const obj = {
+            key: fileName,
+            label,
+            selected: false,
+          };
+          if (!this.frames.some((frame) => frame.key === fileName)) {
+            this.omfgFrames.push(obj);
+          }
+        }
+      });
+    });
+    return this.omfgFrames;
+  }
+
+  async getTheGreatNachoFrames() {
+    if (game.settings.get(CONSTANTS.MODULE_ID, "disable-thegreatnacho-frames")) return [];
+    if (this.theGreatNachoFrames.length > 0) return this.theGreatNachoFrames;
+    logger.debug(`Checking for GreatNacho Token Frames.`);
+
+    for (let i = 1; i <= 20; i++) {
+      const fileName = `modules/vtta-tokenizer/img/thegreatnacho/theGreatNacho-${i}.webp`;
+      const label = `TheGreatNacho ${game.i18n.localize("vtta-tokenizer.label.Frame")} ${i}`;
+      const obj = {
+        key: fileName,
+        label,
+        selected: false,
+      };
+      if (!this.frames.some((frame) => frame.key === fileName)) {
+        this.theGreatNachoFrames.push(obj);
+      }
+    }
+
+    return this.theGreatNachoFrames;
+  }
+
+  async getJColsonFrames() {
+    if (!game.modules.get("token-frames")?.active || game.settings.get(CONSTANTS.MODULE_ID, "disable-jcolson-frames")) {
+      return [];
+    }
+    if (this.jColsonFrames.length > 0) return this.jColsonFrames;
+
+    const directoryPath = "[data] modules/token-frames/token_frames";
+    logger.debug(`Checking for JColson Token Frames files in ${directoryPath}...`);
+
+    const dir = DirectoryPicker.parse(directoryPath);
+    this.jColsonFrames = await this.getDirectoryImageData(dir.activeSource, { bucket: dir.bucket }, dir.current);
+
+    return this.jColsonFrames;
+  }
+
+  static getDefaultFrames() {
+    const npcFrame = game.settings.get(CONSTANTS.MODULE_ID, "default-frame-npc");
+    const otherNPCFrame = game.settings.get(CONSTANTS.MODULE_ID, "default-frame-neutral");
+    const npcDiff = npcFrame !== otherNPCFrame;
+    const setPlayerDefaultFrame = game.settings.get(CONSTANTS.MODULE_ID, "default-frame-pc").replace(/^\/|\/$/g, "");
+    const setNPCDefaultFrame = npcFrame.replace(/^\/|\/$/g, "");
+    const tintFrame = game.settings.get(CONSTANTS.MODULE_ID, "default-frame-tint");
+    const setTintFrame = tintFrame.replace(/^\/|\/$/g, "");
+
+    const defaultFrames = [
+      {
+        key: setTintFrame,
+        label: game.i18n.localize("vtta-tokenizer.default-frame-tint.name"),
+        selected: false,
+      },
+      {
+        key: setPlayerDefaultFrame,
+        label: game.i18n.localize("vtta-tokenizer.default-frame-pc.name"),
+        selected: false,
+      },
+      {
+        key: setNPCDefaultFrame,
+        label: npcDiff
+          ? game.i18n.localize("vtta-tokenizer.default-frame-npc.hostile")
+          : game.i18n.localize("vtta-tokenizer.default-frame-npc.neutral"),
+        selected: true,
+      },
+      {
+        key: CONSTANTS.SHADOWDARK_FRAME,
+        label: game.i18n.localize("vtta-tokenizer.shadowdark-frame.name"),
+        selected: false,
+      },
+    ];
+
+    const foundryDefaultPCFrame = game.settings.settings.get("vtta-tokenizer.default-frame-pc").default.replace(/^\/|\/$/g, "");
+    const foundryDefaultNPCFrame = game.settings.settings.get("vtta-tokenizer.default-frame-npc").default.replace(/^\/|\/$/g, "");
+
+    if (foundryDefaultPCFrame !== setPlayerDefaultFrame) {
+      defaultFrames.push({
+        key: foundryDefaultPCFrame,
+        label: game.i18n.localize("vtta-tokenizer.default-frame-pc.foundry"),
+        selected: false,
+      });
+    }
+    if (foundryDefaultNPCFrame !== setNPCDefaultFrame) {
+      defaultFrames.push({
+        key: foundryDefaultNPCFrame,
+        label: npcDiff
+          ? game.i18n.localize("vtta-tokenizer.default-frame-npc.foundry-hostile")
+          : game.i18n.localize("vtta-tokenizer.default-frame-npc.foundry-neutral"),
+        selected: false,
+      });
+    }
+
+    if (npcDiff) {
+      defaultFrames.push({
+        key: otherNPCFrame.replace(/^\/|\/$/g, ""),
+        label: game.i18n.localize("vtta-tokenizer.default-frame-npc.other"),
+        selected: false,
+      });
+    }
+
+    return defaultFrames;
+  }
+
+  static generateImageData(file, prefix = "", selected = false) {
+    const labelSplit = file.split("/").pop().trim();
+    const regex = new RegExp(`^${prefix}-`);
+    const label = labelSplit.replace(regex, "").replace(/[-_]/g, " ");
+    return {
+      key: file,
+      label: Utils.titleString(label).split(".")[0],
+      selected,
+    };
+  }
+
+  async getDirectoryImageData(activeSource, options, path, type = "frame") {
+    const fileList = await DirectoryPicker.browse(activeSource, path, options);
+    const folderImages = fileList.files
+      .filter((file) => Utils.endsWithAny(["png", "jpg", "jpeg", "gif", "webp", "webm", "bmp"], file))
+      .map((file) => {
+        return Tokenizer.generateImageData(file, `${type}-`);
+      });
+
+    let dirImages = [];
+    if (fileList.dirs.length > 0) {
+      for (let i = 0; i < fileList.dirs.length; i++) {
+        const dir = fileList.dirs[i];
+        // eslint-disable-next-line no-await-in-loop
+        const subDirImages = await this.getDirectoryImageData(activeSource, options, dir);
+        dirImages.push(...subDirImages);
+      }
+    }
+    const result = folderImages.concat(dirImages);
+    return result;
+  }
+
+  async getFrames() {
+    const directoryPath = game.settings.get(CONSTANTS.MODULE_ID, "frame-directory");
+    logger.debug(`Checking for files in ${directoryPath}...`);
+    const dir = DirectoryPicker.parse(directoryPath);
+    const folderFrames = (directoryPath && directoryPath.trim() !== "" && directoryPath.trim() !== "[data]")
+      ? await this.getDirectoryImageData(dir.activeSource, { bucket: dir.bucket }, dir.current)
+      : [];
+
+    this.getOMFGFrames();
+    this.getTheGreatNachoFrames();
+    await this.getJColsonFrames();
+
+    const frames = this.defaultFrames.concat(folderFrames, this.customFrames, this.omfgFrames, this.theGreatNachoFrames, this.jColsonFrames);
+
+    this.frames = frames;
+    return this.frames;
+  }
+
+  async getMasks() {
+    const directoryPath = game.settings.get(CONSTANTS.MODULE_ID, "masks-directory");
+    logger.debug(`Checking for files in ${directoryPath}...`);
+    const dir = DirectoryPicker.parse(directoryPath);
+    const folderMasks = (directoryPath && directoryPath.trim() !== "" && directoryPath.trim() !== "[data]")
+      ? await this.getDirectoryImageData(dir.activeSource, { bucket: dir.bucket }, dir.current)
+      : [];
+
+    const masks = this.defaultMasks.concat(folderMasks, this.customMasks);
+
+    this.masks = masks;
+    return this.masks;
+  }
+
+  async handleFrameSelection(framePath) {
+    const frameInList = this.frames.some((frame) => frame.key === framePath);
+    if (!frameInList) {
+      const frame = Tokenizer.generateImageData(framePath, "frame-");
+      this.frames.push(frame);
+      this.customFrames.push(frame);
+      game.settings.set("vtta-tokenizer", "custom-frames", this.customFrames);
+    }
+    this._setTokenFrame(framePath, true);
+  }
+
+  static getDefaultMasks() {
+    const defaultMask = game.settings.get(CONSTANTS.MODULE_ID, "default-mask-layer").replace(/^\/|\/$/g, "");
+
+    const defaultMasks = [
+      {
+        key: defaultMask,
+        label: game.i18n.localize("vtta-tokenizer.default-mask.name"),
+        selected: true,
+      },
+    ];
+
+    const foundryDefaultMask = CONSTANTS.DEFAULT_MASK;
+    if (defaultMask !== foundryDefaultMask) {
+      defaultMasks.push({
+        key: foundryDefaultMask,
+        label: game.i18n.localize("vtta-tokenizer.dynamic-mask.foundry"),
+        selected: false,
+      });
+    }
+
+    const foundryDefaultTopMask = CONSTANTS.DEFAULT_TOP_MASK;
+    if (defaultMask !== foundryDefaultTopMask) {
+      defaultMasks.push({
+        key: foundryDefaultTopMask,
+        label: game.i18n.localize("vtta-tokenizer.dynamic-top-mask.foundry"),
+        selected: false,
+      });
+    }
+
+    return defaultMasks;
+  }
+
+  async handleMaskSelection(maskPath) {
+    const maskInList = this.masks.some((mask) => mask.key === maskPath);
+    if (!maskInList) {
+      const mask = Tokenizer.generateImageData(maskPath, "mask-");
+      this.masks.push(mask);
+      this.customMasks.push(mask);
+      game.settings.set("vtta-tokenizer", "custom-masks", this.customMasks);
+    }
+    this._setTokenMask(maskPath, true);
+  }
+
+  getBaseUploadDirectory() {
+    if (this.tokenType === "character") {
+      return game.settings.get("vtta-tokenizer", "image-upload-directory");
+    } else if (this.tokenType === "npc") {
+      return game.settings.get("vtta-tokenizer", "npc-image-upload-directory");
+    } else {
+      return game.settings.get("vtta-tokenizer", "image-upload-directory");
+    }
+  }
+
+  //  Options include
+  //  name: name to use as part of filename identifier
+  //  type: pc, npc
+  //  disposition: token disposition = -1, 0, 1
+  //  avatarFilename: current avatar image - defaults to null/mystery man
+  //  tokenFilename: current tokenImage - defaults to null/mystery man
+  //  targetFolder: folder to target, otherwise uses defaults, wildcard use folder derived from wildcard path
+  //  isWildCard: is wildcard token?
+  //  tokenOffset: { position: {x:0, y:0} }
+  //  forceDynamicRing: true - force dynamic ring on token
+  //  any other items needed in callback function, options will be passed to callback, with filenames updated to new references
+  //
+  constructor(options, callback) {
+    super();
+    this.tokenOptions = options;
+    this.defaultOffset = game.settings.get(CONSTANTS.MODULE_ID, "default-token-offset");
+    this.tokenOffset = options.tokenOffset
+      ? options.tokenOffset
+      : { position: { x: this.defaultOffset, y: this.defaultOffset } };
+    this.callback = callback;
+    this.modifyAvatar = !game.settings.get(CONSTANTS.MODULE_ID, "token-only-toggle");
+    this.modifyToken = true;
+    // frames
+    this.defaultFrames = Tokenizer.getDefaultFrames();
+    this.frames = [];
+    this.omfgFrames = [];
+    this.theGreatNachoFrames = [];
+    this.jColsonFrames = [];
+    this.customFrames = game.settings.get(CONSTANTS.MODULE_ID, "custom-frames");
+    this.addMask = game.settings.get(CONSTANTS.MODULE_ID, "add-mask-default");
+    // masks
+    this.defaultMasks = Tokenizer.getDefaultMasks();
+    this.masks = [];
+    this.customMasks = game.settings.get(CONSTANTS.MODULE_ID, "custom-masks");
+    this.addFrame = game.settings.get(CONSTANTS.MODULE_ID, "add-frame-default");
+    // colors
+    this.defaultColor = game.settings.get(CONSTANTS.MODULE_ID, "default-color");
+    this.tokenType = this.tokenOptions.type === "pc" ? "pc" : "npc";
+    this.nameSuffix = this.tokenOptions.nameSuffix ? this.tokenOptions.nameSuffix : "";
+    this.imageFormat = game.settings.get(CONSTANTS.MODULE_ID, "image-save-type");
+    // add some default file names, these will likely be changed
+    this.wildCardPath = undefined;
+    this.avatarUploadDirectory = this.getOverRidePath(false) || this.getBaseUploadDirectory();
+    this.tokenUploadDirectory = this.getOverRidePath(true) || this.getBaseUploadDirectory();
+    this.avatarFileName = `${this.tokenOptions.name}.Avatar${this.nameSuffix}.${this.imageFormat}`;
+    this.tokenFileName = `${this.tokenOptions.name}.Token${this.nameSuffix}.${this.imageFormat}`;
+    this.activeLayerSelectorElement = null;
+
+    if (this.tokenOptions.actor) {
+      const state = TokenStates.getState(
+        this.tokenOptions.actor,
+        this.tokenOptions.stateId,
+        this.tokenOptions.token,
+      );
+      this.tokenOptions.stateId = state.id;
+      this.tokenOptions.stateName = state.name;
+      this.tokenOptions.stateSlug = state.slug;
+      if (!this.tokenOptions.avatarFilename) {
+        this.tokenOptions.avatarFilename = TokenStates.getAvatarSrc(this.tokenOptions.actor, state.id);
+      }
+      if (!this.tokenOptions.tokenFilename) {
+        this.tokenOptions.tokenFilename = TokenStates.getTokenSrc(
+          this.tokenOptions.actor,
+          this.tokenOptions.token,
+          state.id,
+        );
+      }
+    }
+  }
+
+  static PARTS = {
+    form: {
+      template: "modules/vtta-tokenizer/templates/tokenizer.hbs",
+    },
+  };
+
+  static DEFAULT_OPTIONS = {
+    id: "tokenizer-control",
+    classes: ["tokenizer", "themed", "theme-light"],
+    tag: "form",
+    form: {
+      handler: Tokenizer.formHandler,
+      submitOnChange: false,
+      closeOnSubmit: true,
+    },
+    actions: {
+      filePickerThumbs: Tokenizer.filePickerThumbs,
+      boxButton: Tokenizer.boxButton,
+      menuButton: Tokenizer.menuButton,
+      invisibleButton: Tokenizer.invisibleButton,
+      chooseImage: this.#onChooseImage,
+      addTokenState: Tokenizer.addTokenState,
+      renameTokenState: Tokenizer.renameTokenState,
+      deleteTokenState: Tokenizer.deleteTokenState,
+    },
+    position: {
+      width: "auto",
+      height: "auto",
+    },
+    window: {
+      title: "Tokenizer",
+    },
+  };
+
+  get title() {
+    const stateName = this.tokenOptions?.stateName;
+    return stateName ? `Tokenizer — ${stateName}` : "Tokenizer";
+  }
+
+  /* -------------------------------------------- */
+
+  async _prepareContext() {
+    const frames = await this.getFrames();
+    const masks = await this.getMasks();
+    const pasteTarget = game.settings.get(CONSTANTS.MODULE_ID, "paste-target") ?? "token";
+    const pasteTargetName = Utils.titleString(pasteTarget);
+
+    const actor = this.tokenOptions.actor;
+    const showStates = Boolean(actor) && !this.tokenOptions.isWildCard;
+    const states = showStates
+      ? TokenStates.getStates(actor, this.tokenOptions.token).map((state) => ({
+        ...state,
+        selected: state.id === (this.tokenOptions.stateId ?? TokenStates.DEFAULT_ID),
+      }))
+      : [];
+
+    return {
+      options: this.tokenOptions,
+      canUpload: game.user && game.user.can("FILES_UPLOAD"),
+      canBrowse: game.user && game.user.can("FILES_BROWSE"),
+      tokenVariantsEnabled: game.user && game.user.can("FILES_BROWSE") && game.modules.get("token-variants")?.active,
+      frames,
+      masks,
+      pasteTarget,
+      pasteTargetName,
+      modifyAvatar: this.modifyAvatar,
+      showStates,
+      states,
+      currentIsDefault: TokenStates.isDefault(this.tokenOptions.stateId),
+    };
+  }
+
+  static async #onChooseImage(event, button) {
+    const target = button.dataset.target;
+    let current = "";
+    let view;
+    if (target === "foundryAvatar") {
+      view = this.Avatar;
+      current = this.tokenOptions.avatarFilename || "";
+    } else if (target === "foundryToken") {
+      view = this.Token;
+      current = this.tokenOptions.tokenFilename || "";
+    }
+
+    const fp = new foundry.applications.apps.FilePicker.implementation({
+      type: "image",
+      current: current,
+      callback: (path) => {
+        Utils.download(path)
+          .then((img) => view.addImageLayer(img, { type: "image" }))
+          .catch((error) => ui.notifications.error(error));
+      },
+    });
+
+    fp.render(true);
+  }
+
+  getWildCardPath() {
+    if (!this.tokenOptions.isWildCard) return undefined;
+    this.wildCardPath = this.tokenOptions.tokenFilename
+      ? Utils.dirPath(this.tokenOptions.tokenFilename)
+      : `${this.tokenUploadDirectory}`;
+    return this.wildCardPath;
+  }
+
+  getOverRidePath(isToken) {
+    let path;
+    if (isToken && this.tokenOptions.isWildCard) {
+      path = this.getWildCardPath();
+    }
+    if (!path) {
+      path = this.tokenOptions.targetFolder
+        ? this.tokenOptions.targetFolder
+        : undefined;
+    }
+    return path;
+  }
+
+  async _getFilename(suffix = "Avatar", postfix = "") {
+    const actorName = await Utils.makeSlug(this.tokenOptions.name);
+
+    if (suffix === "Token" && this.tokenOptions.isWildCard) {
+      // for wildcards we respect the current path of the existing/provided tokenpath
+      const dirOptions = DirectoryPicker.parse(this.wildCardPath);
+      const tokenWildcard = this.tokenOptions.tokenFilename.indexOf("*") === -1
+        // set it to a wildcard we can actually use
+        ? `${dirOptions.current}/${actorName}.Token-*.${this.imageFormat}`
+        : this.tokenOptions.tokenFilename.endsWith(`.${this.imageFormat}`)
+          ? this.tokenOptions.tokenFilename
+          : `${this.tokenOptions.tokenFilename}.${this.imageFormat}`;
+
+      const FPClass = foundry.applications.apps.FilePicker.implementation;
+      const browser = await FPClass.browse(dirOptions.activeSource, tokenWildcard, {
+        wildcard: true,
+      });
+
+      const newCount = browser.files.length + 1;
+      const num = newCount.toString().padStart(3, "0");
+      const targetFilename = tokenWildcard.replace(/\*/g, num).split("/").pop();
+
+      return targetFilename;
+    }
+    return `${actorName}.${suffix}${postfix}.${this.imageFormat}`;
+  }
+
+  async updateToken(dataBlob) {
+    if (this.modifyToken) {
+      this.tokenOptions.tokenUploadDirectory = this.tokenUploadDirectory;
+      const filePath = await Utils.uploadToFoundry(dataBlob, this.tokenUploadDirectory, this.tokenFileName);
+      logger.debug(`Created token at ${filePath}`);
+      this.tokenOptions.tokenFilename = filePath;
+    }
+  }
+
+  async updateAvatar(dataBlob) {
+    if (this.modifyAvatar) {
+      this.tokenOptions.avatarUploadDirectory = this.avatarUploadDirectory;
+      const filePath = await Utils.uploadToFoundry(dataBlob, this.avatarUploadDirectory, this.avatarFileName);
+      logger.debug(`Created avatar at ${filePath}`);
+      this.tokenOptions.avatarFilename = filePath;
+    }
+  }
+
+  static async formHandler() {
+    // upload token and avatar
+    const dataResults = await Promise.all([this.Avatar.get("blob"), this.Token.get("blob")]);
+    await this.updateAvatar(dataResults[0]);
+    await this.updateToken(dataResults[1]);
+    this.tokenOptions.modifyAvatar = this.modifyAvatar;
+    this.tokenOptions.modifyToken = this.modifyToken;
+    this.callback(this.tokenOptions);
+  }
+
+  closeQuickLayerSelector(type) {
+    const menu = document.getElementById(`quick-${type}-menu`);
+    menu.classList.remove("show");
+    this.lastControlButtonClicked = null;
+    this.activeLayerSelectorElement = null;
+  }
+
+  /* -------------------------------------------- */
+
+  async _initAvatar(inputUrl) {
+    const url = inputUrl ?? CONST.DEFAULT_TOKEN ?? 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+    const avatarView = document.querySelector(".avatar > .view");
+    if (this.Avatar) {
+      this.Avatar.canvas.remove();
+      this.Avatar.stage.remove();
+      this.Avatar.controlsArea.remove();
+      this.Avatar.menu.remove();
+    }
+    this.Avatar = null;
+    try {
+      const img = await Utils.download(url);
+      const MAX_DIMENSION = Math.max(img.naturalHeight, img.naturalWidth, game.settings.get(CONSTANTS.MODULE_ID, "portrait-size"));
+      logger.debug("Setting Avatar dimensions to " + MAX_DIMENSION + "x" + MAX_DIMENSION);
+      this.Avatar = new View(this, MAX_DIMENSION, avatarView);
+      this.Avatar.addImageLayer(img, { type: "original" });
+
+      // Setting the height of the form to the desired auto height
+      this.element.style.height = "auto";
+    } catch (error) {
+      if (inputUrl) {
+        const error = game.i18n.format("vtta-tokenizer.notification.failedInput", { url });
+        ui.notifications.error(error);
+        if (inputUrl !== this.tokenOptions.avatarFilename) {
+          await this._initAvatar(this.tokenOptions.avatarFilename);
+        } else {
+          await this._initAvatar();
+        }
+      } else {
+        ui.notifications.error(game.i18n.localize("vtta-tokenizer.notification.failedFallback"));
+      }
+    }
+
+    this.element.querySelectorAll("#avatar-options :is(input, select, textarea, button)").forEach((el) => {
+      el.disabled = !this.modifyAvatar;
+    });
+    this.element.querySelectorAll("#tokenizer-avatar :is(input, select, textarea, button)").forEach((el) => {
+      el.disabled = !this.modifyAvatar;
+    });
+    this.element.querySelectorAll("#token-options :is(input, select, textarea, button)").forEach((el) => {
+      el.disabled = !this.modifyToken;
+    });
+    this.element.querySelectorAll("#tokenizer-token :is(input, select, textarea, button)").forEach((el) => {
+      el.disabled = !this.modifyToken;
+    });
+  }
+
+  _onRender() {
+    this.loadImages();
+    const select = this.element.querySelector("select[name='tokenState']");
+    if (select) {
+      select.addEventListener("change", (event) => this.onStateSelect(event.target.value));
+    }
+  }
+
+  getNamePostfix() {
+    const suffix = this.nameSuffix || "";
+    if (TokenStates.isDefault(this.tokenOptions.stateId)) return suffix;
+    const slug = this.tokenOptions.stateSlug || this.tokenOptions.stateId || "state";
+    return `${suffix}.State.${slug}`;
+  }
+
+  async updateTargetFilenames() {
+    const postfix = this.getNamePostfix();
+    const avatarName = await this._getFilename("Avatar", postfix);
+    const tokenName = await this._getFilename("Token", postfix);
+    const avatarInput = this.element?.querySelector('input[name="targetAvatarFilename"]');
+    if (avatarInput) avatarInput.value = avatarName;
+    this.avatarFileName = avatarName;
+    const filenameSpan = this.element?.querySelector('span[name="targetFilename"]');
+    if (filenameSpan) filenameSpan.textContent = tokenName;
+    const tokenInput = this.element?.querySelector('input[name="targetTokenFilename"]');
+    if (tokenInput) tokenInput.value = tokenName;
+    this.tokenFileName = tokenName;
+  }
+
+  #setWindowTitle() {
+    const title = this.element?.querySelector(".window-title");
+    if (title) title.textContent = this.title;
+  }
+
+  syncStateBar() {
+    const select = this.element?.querySelector("select[name='tokenState']");
+    const actor = this.tokenOptions.actor;
+    if (!select || !actor) return;
+    const current = this.tokenOptions.stateId ?? TokenStates.DEFAULT_ID;
+    const native = game.i18n.localize(`${CONSTANTS.MODULE_ID}.states.native-short`);
+    select.innerHTML = TokenStates.getStates(actor, this.tokenOptions.token).map((state) => {
+      const label = state.isDefault ? `${state.name} — ${native}` : state.name;
+      const selected = state.id === current ? " selected" : "";
+      return `<option value="${state.id}"${selected}>${foundry.utils.escapeHTML(label)}</option>`;
+    }).join("");
+    const del = this.element.querySelector("[data-action='deleteTokenState']");
+    if (del) del.disabled = TokenStates.isDefault(current);
+    this.#setWindowTitle();
+  }
+
+  applyStateToOptions(state) {
+    this.tokenOptions.stateId = state.id;
+    this.tokenOptions.stateName = state.name;
+    this.tokenOptions.stateSlug = state.slug;
+    this.tokenOptions.avatarFilename = TokenStates.getAvatarSrc(this.tokenOptions.actor, state.id);
+    this.tokenOptions.tokenFilename = TokenStates.getTokenSrc(
+      this.tokenOptions.actor,
+      this.tokenOptions.token,
+      state.id,
+    );
+    this.tokenOptions.forceDynamicRing = Boolean(state.forceDynamicRing);
+  }
+
+  static destroyView(view) {
+    if (!view) return;
+    view.canvas?.remove();
+    view.stage?.remove();
+    view.controlsArea?.remove();
+    view.menu?.remove();
+  }
+
+  async _recreateTokenView() {
+    const tokenView = this.element.querySelector(".token > .view");
+    Tokenizer.destroyView(this.Token);
+    this.Token = new View(this, game.settings.get(CONSTANTS.MODULE_ID, "token-size"), tokenView);
+    this._loadTokenImageToTokenView();
+  }
+
+  async onStateSelect(stateId) {
+    if (!this.tokenOptions.actor || stateId === this.tokenOptions.stateId) return;
+    const state = TokenStates.getState(this.tokenOptions.actor, stateId, this.tokenOptions.token);
+    this.applyStateToOptions(state);
+    await this.updateTargetFilenames();
+    await this._initAvatar(this.tokenOptions.avatarFilename);
+    await this._recreateTokenView();
+    this.syncStateBar();
+  }
+
+  static async addTokenState(event) {
+    event.preventDefault();
+    const name = await TokenStates.promptName();
+    if (!name || !this.tokenOptions.actor) return;
+    const state = await TokenStates.createState(this.tokenOptions.actor, name, {
+      token: this.tokenOptions.token,
+    });
+    if (!state) return;
+    this.tokenOptions.stateId = state.id;
+    this.tokenOptions.stateName = state.name;
+    this.tokenOptions.stateSlug = state.slug;
+    await this.updateTargetFilenames();
+    this.syncStateBar();
+  }
+
+  static async renameTokenState(event) {
+    event.preventDefault();
+    if (!this.tokenOptions.actor) return;
+    const name = await TokenStates.promptName({
+      title: game.i18n.localize(`${CONSTANTS.MODULE_ID}.states.rename-title`),
+      value: this.tokenOptions.stateName,
+    });
+    if (!name) return;
+    const state = await TokenStates.renameState(
+      this.tokenOptions.actor,
+      this.tokenOptions.stateId,
+      name,
+    );
+    if (!state) return;
+    this.tokenOptions.stateName = state.name;
+    this.syncStateBar();
+  }
+
+  static async deleteTokenState(event) {
+    event.preventDefault();
+    if (!this.tokenOptions.actor || TokenStates.isDefault(this.tokenOptions.stateId)) return;
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: game.i18n.localize(`${CONSTANTS.MODULE_ID}.states.delete-title`) },
+      content: `<p>${game.i18n.format(`${CONSTANTS.MODULE_ID}.states.delete-confirm`, { name: this.tokenOptions.stateName })}</p>`,
+    });
+    if (!confirmed) return;
+    await TokenStates.deleteState(this.tokenOptions.actor, this.tokenOptions.stateId);
+    await this.onStateSelect(TokenStates.DEFAULT_ID);
+  }
+
+  static async filePickerThumbs(event, target) {
+    event.preventDefault();
+    switch (target.dataset.type) {
+      case "mask": {
+        const picker = new ImageBrowser(this.masks, { type: "image", callback: this.handleMaskSelection.bind(this) });
+        picker.render({ force: true });
+        break;
+      }
+      case "frame": {
+        const picker = new ImageBrowser(this.frames, { type: "image", callback: this.handleFrameSelection.bind(this) });
+        picker.render({ force: true });
+        break;
+      }
+      // no default
+    }
+  }
+
+  static async invisibleButton(event) {
+    event.preventDefault();
+  }
+
+  static async boxButton(event, target) {
+    event.preventDefault();
+    const targetName = target.dataset.target;
+    const isAvatar = targetName === "avatar";
+    const view = isAvatar ? this.Avatar : this.Token;
+
+    switch (target.dataset.type) {
+      case "modify-toggle": {
+        const button = document.getElementById(`modify-${targetName}`);
+        const fas = document.getElementById(`modify-${targetName}-fas`);
+        const newState = isAvatar
+          ? !this.modifyAvatar
+          : !this.modifyToken;
+
+        fas.classList.toggle("fa-regular");
+        fas.classList.toggle("fas");
+        fas.classList.toggle("fa-square");
+        fas.classList.toggle("fa-square-check");
+
+        this.element.querySelectorAll(`#${targetName}-options :is(input, select, textarea, button)`).forEach((el) => {
+          el.disabled = !newState;
+        });
+        this.element.querySelectorAll(`#tokenizer-${targetName} :is(input, select, textarea, button)`).forEach((el) => {
+          el.disabled = !newState;
+        });
+
+        if (isAvatar) {
+          this.modifyAvatar = newState;
+        } else {
+          this.modifyToken = newState;
+        }
+
+        button.classList.toggle('deselected');
+        fas.classList.toggle('deselected');
+        break;
+      }
+      case "paste-toggle": {
+        const avatarButton = document.getElementById(`paste-avatar`);
+        const avatarFas = document.getElementById(`paste-avatar-fas`);
+        const tokenButton = document.getElementById(`paste-token`);
+        const tokenFas = document.getElementById(`paste-token-fas`);
+        game.settings.set("vtta-tokenizer", "paste-target", targetName);
+
+        avatarButton.classList.toggle('deselected');
+        avatarFas.classList.toggle("fa-circle");
+        avatarFas.classList.toggle("fa-circle-dot");
+        tokenButton.classList.toggle('deselected');
+        tokenFas.classList.toggle("fa-circle");
+        tokenFas.classList.toggle("fa-circle-dot");
+        break;
+      }
+      case "quick-preset": {
+        // pop up selection box
+        const button = document.getElementById(`quick-${targetName}`);
+        const menu = document.getElementById(`quick-${targetName}-menu`);
+        menu.classList.toggle("show");
+        this.lastControlButtonClicked = button;
+        this.activeLayerSelectorElement = menu.classList.contains("show")
+          ? menu
+          : null;
+        break;
+      }
+      case "quick-token-dynamic": {
+        this.closeQuickLayerSelector(targetName);
+        const frameIds = view.layers.filter((l) => ["mask", "frame"].includes(l.type)).map((l) => l.id);
+        for (const id of frameIds) {
+          view.removeImageLayer(id);
+        }
+        await this._setTokenMask(CONSTANTS.DEFAULT_MASK, true);
+        this.tokenOptions.forceDynamicRing = true;
+        break;
+      }
+      case "quick-avatar-lineart":
+      case "quick-token-lineart": {
+        this.closeQuickLayerSelector(targetName);
+        const removalTypes = isAvatar ? ["mask", "frame"] : ["mask", "frame", "original"];
+        const frameIds = view.layers.filter((l) => removalTypes.includes(l.type)).map((l) => l.id);
+        for (const id of frameIds) {
+          view.removeImageLayer(id);
+        }
+        if (!isAvatar) {
+          const img = await this.Avatar.get("img");
+          view.addImageLayer(img, {
+            activate: true,
+            type: "image",
+            position: { x: this.defaultOffset, y: this.defaultOffset },
+          });
+          await this._setTokenFrame(CONSTANTS.SHADOWDARK_FRAME, true);
+        }
+        view.layers.filter((l) => ["image", "original"].includes(l.type)).forEach((l) => {
+          l.contrast = 40;
+          l.brightness = -30;
+          l.lineArtBlurSize = 25;
+          l.filters.push(l.lineArtEffect.bind(l));
+        });
+        view.refreshControls();
+        view.redraw(true);
+        break;
+      }
+      case "quick-avatar-reset":
+      case "quick-token-reset": {
+        this.closeQuickLayerSelector(targetName);
+        view.removeAllLayers();
+        if (isAvatar) {
+          await this._initAvatar();
+        } else {
+          this._loadTokenImageToTokenView();
+        }
+        break;
+      }
+      default:
+        logger.debug("Unhandled box-button click:", {
+          event,
+          target,
+          type: target.dataset?.type,
+        });
+    }
+  }
+
+  static async menuButton(event, target) {
+    event.preventDefault();
+    const view = target.dataset.target === "avatar" ? this.Avatar : this.Token;
+
+    switch (target.dataset.type) {
+      case "upload": {
+        const img = await Utils.upload();
+        view.addImageLayer(img, { type: "image" });
+        break;
+      }
+      case "download-token": {
+        const filename = this.tokenFileName;
+        const blob = await this.Token.get("blob");
+        const file = new File([blob], filename, { type: blob.type });
+        let a = document.createElement("a");
+        a.href = URL.createObjectURL(file);
+        a.download = filename;
+        a.click();
+        break;
+      }
+      case "download": {
+        const result = await foundry.applications.api.DialogV2.prompt({
+          window: { title: "Download from the internet" },
+          content: `
+            <p>${game.i18n.localize("vtta-tokenizer.download.url")}.</p>
+            <div class="form-group">
+              <label>URL</label>
+              <input id="tokenizerurl" type="text" name="tokenizerurl" placeholder="https://" data-dtype="String">
+            </div>`,
+          ok: {
+            label: game.i18n.localize("vtta-tokenizer.label.OK"),
+            callback: (event, button) => {
+              return button.form.elements.tokenizerurl.value;
+            },
+          },
+          rejectClose: false,
+        });
+        if (result) {
+          try {
+            const img = await Utils.download(result);
+            view.addImageLayer(img, { type: "image" });
+          } catch (error) {
+            logger.error("Error fetching image", error);
+            ui.notifications.error(error);
+          }
+        }
+        break;
+      }
+      case "token": {
+        this.Token.get("img").then((img) => view.addImageLayer(img, { type: "image" }));
+        break;
+      }
+      case "avatar": {
+        this.Avatar.get("img").then((img) => view.addImageLayer(img, { activate: true, type: "image" }));
+        break;
+      }
+      case "color": {
+        const defaultColor = game.settings.get(CONSTANTS.MODULE_ID, "default-color");
+        view.addColorLayer({ color: defaultColor });
+        break;
+      }
+      case "tokenVariants": {
+        game.modules.get('token-variants').api.showArtSelect(this.tokenOptions.name, {
+          callback: (imgSrc) => Utils.download(imgSrc).then((img) => view.addImageLayer(img, { type: "image" })),
+          searchType: target.dataset.target === "avatar" ? "Portrait" : "Token",
+        });
+        break;
+      }
+      case "locations": {
+        const locations = new TokenizerSaveLocations(this);
+        locations.render({ force: true });
+        break;
+      }
+      // no default
+    }
+  }
+
+  async _addBaseTokenLayers() {
+    if (game.settings.get(CONSTANTS.MODULE_ID, "default-color-layer")) {
+      this.Token.addColorLayer({ color: this.defaultColor });
+    }
+    if (game.settings.get(CONSTANTS.MODULE_ID, "enable-default-texture-layer")) {
+      await this._addTokenTexture();
+    }
+  }
+
+  async _addHigherTokenLayers() {
+    if (this.addFrame) {
+      logger.debug("Loading default token frame");
+      await this._setTokenFrame();
+    }
+    if (this.addMask) {
+      logger.debug("Loading default token mask");
+      await this._setTokenMask();
+    }
+  }
+
+  async _initWildCardToken() {
+    await this._addBaseTokenLayers();
+    await this._addHigherTokenLayers();
+  }
+
+  async _initToken(src) {
+    let imgSrc = src ?? CONST.DEFAULT_TOKEN;
+    try {
+      logger.debug("Initializing Token, trying to download", imgSrc);
+      const img = await Utils.download(imgSrc);
+      logger.debug("Got image", img);
+
+      await this._addBaseTokenLayers();
+      // if we add a frame by default offset the token image
+      const options = this.addFrame || this.addMask
+        ? this.tokenOffset
+        : {};
+      this.Token.addImageLayer(img, { ...options, type: "original" });
+      await this._addHigherTokenLayers();
+    } catch (error) {
+      if (!src || src === CONST.DEFAULT_TOKEN) {
+        logger.error(`Failed to load fallback token: "${imgSrc}"`);
+      } else {
+        const errorMessage = game.i18n.format("vtta-tokenizer.notification.failedLoad", { imgSrc, default: CONST.DEFAULT_TOKEN });
+        ui.notifications.error(errorMessage);
+        logger.error("Failed to init image", errorMessage);
+        await this._initToken();
+      }
+    }
+  }
+
+  #getNPCFrame() {
+    const tintFrame = game.settings.get(CONSTANTS.MODULE_ID, "frame-tint");
+    let npcFrame;
+    if (tintFrame) {
+      npcFrame = game.settings.get(CONSTANTS.MODULE_ID, "default-frame-tint");
+    } else {
+      switch (parseInt(this.tokenOptions.disposition)) {
+        case 0:
+        case 1: {
+          npcFrame = game.settings.get(CONSTANTS.MODULE_ID, "default-frame-neutral");
+          break;
+        }
+
+        case -1:
+        default: {
+          npcFrame = game.settings.get(CONSTANTS.MODULE_ID, "default-frame-npc");
+          break;
+        }
+      }
+    }
+    return npcFrame;
+  }
+
+  #getTintColor() {
+    if (this.tokenType === "pc") {
+      return game.settings.get(CONSTANTS.MODULE_ID, "default-frame-tint-pc");
+    }
+    switch (parseInt(this.tokenOptions.disposition)) {
+      case 0: {
+        return game.settings.get(CONSTANTS.MODULE_ID, "default-frame-tint-neutral");
+      }
+      case 1: {
+        return game.settings.get(CONSTANTS.MODULE_ID, "default-frame-tint-friendly");
+      }
+      case -1:
+      default: {
+        return game.settings.get(CONSTANTS.MODULE_ID, "default-frame-tint-hostile");
+      }
+    }
+  }
+
+  async _setTokenFrame(fileName, fullPath = false) {
+    // load the default frame, if there is one set
+    const tintFrame = game.settings.get(CONSTANTS.MODULE_ID, "frame-tint");
+    const npcFrame = this.#getNPCFrame();
+
+    const frameTypePath = this.tokenType === "pc"
+      ? tintFrame
+        ? game.settings.get(CONSTANTS.MODULE_ID, "default-frame-tint")
+        : game.settings.get(CONSTANTS.MODULE_ID, "default-frame-pc")
+      : npcFrame;
+    const isDefault = fileName != npcFrame.replace(/^\/|\/$/g, "");
+
+    const framePath = fileName && !isDefault
+      ? `${game.settings.get(CONSTANTS.MODULE_ID, "frame-directory")}/${fileName}`
+      : fileName && isDefault
+        ? fileName.replace(/^\/|\/$/g, "")
+        : frameTypePath.replace(/^\/|\/$/g, "");
+
+    const tintColor = this.#getTintColor();
+
+    if (framePath && framePath.trim() !== "") {
+      const options = DirectoryPicker.parse(fullPath ? fileName : framePath);
+      try {
+        const img = await Utils.download(options.current);
+        this.Token.addImageLayer(img, { masked: true, onTop: true, tintColor, tintLayer: tintFrame && !fileName, type: "frame" });
+      } catch (error) {
+        const errorMessage = game.i18n.format("vtta-tokenizer.notification.failedLoadFrame", { frame: options.current });
+        ui.notifications.error(errorMessage);
+      }
+    }
+  }
+
+  async _setTokenMask(fileName, fullPath = false) {
+    const defaultMaskPath = game.settings.get(CONSTANTS.MODULE_ID, "default-mask-layer");
+    const isDefault = fileName != defaultMaskPath.replace(/^\/|\/$/g, "");
+
+    const maskPath = fileName && !isDefault
+      ? `${game.settings.get(CONSTANTS.MODULE_ID, "masks-directory")}/${fileName}`
+      : fileName && isDefault
+        ? fileName.replace(/^\/|\/$/g, "")
+        : defaultMaskPath.replace(/^\/|\/$/g, "");
+
+    if (maskPath && maskPath.trim() !== "") {
+      const options = DirectoryPicker.parse(fullPath ? fileName : maskPath);
+      try {
+        const img = await Utils.download(options.current);
+        this.Token.addImageLayer(img, { masked: true, onTop: true, maskFromImage: true, visible: false, type: "mask" });
+      } catch (error) {
+        const errorMessage = game.i18n.format("vtta-tokenizer.notification.failedLoadMask", { mask: options.current });
+        ui.notifications.error(errorMessage);
+      }
+    }
+  }
+
+  async _addTokenTexture(fileName, fullPath = false) {
+    // load the default frame, if there is one set
+    const tintLayerColour = game.settings.get(CONSTANTS.MODULE_ID, "default-texture-layer-tint");
+    const tintLayerPath = game.settings.get(CONSTANTS.MODULE_ID, "default-texture-layer");
+    const tintColor = tintLayerColour.trim() !== "" ? tintLayerColour : undefined;
+
+    if (tintLayerPath && tintLayerPath.trim() !== "") {
+      const options = DirectoryPicker.parse(fullPath ? fileName : tintLayerPath.replace(/^\/|\/$/g, ""));
+      try {
+        const img = await Utils.download(options.current);
+        this.Token.addImageLayer(img, { masked: true, onTop: true, tintColor, tintLayer: tintLayerPath && tintColor, type: "texture" });
+      } catch (error) {
+        const errorMessage = game.i18n.format("vtta-tokenizer.notification.failedLoadTexture", { texture: options.current });
+        ui.notifications.error(errorMessage);
+      }
+    }
+  }
+
+  pasteImage(event) {
+    const pasteTarget = game.settings.get(CONSTANTS.MODULE_ID, "paste-target");
+    const view = pasteTarget === "token" ? this.Token : this.Avatar;
+    Utils.extractImage(event, view);
+  }
+
+  _loadTokenImageToTokenView() {
+    if (this.tokenOptions.isWildCard) {
+      this._initWildCardToken();
+    } else {
+      this._initToken(this.tokenOptions.tokenFilename);
+    }
+  }
+
+  loadImages() {
+    let tokenView = this.element?.querySelector(".token > .view") ?? document.querySelector(".token > .view");
+
+    this.updateTargetFilenames();
+
+    if (this.tokenOptions.isWildCard) {
+      const header = document.getElementById("tokenizer-token-header");
+      header.innerText = `${game.i18n.localize("vtta-tokenizer.label.token")} (${game.i18n.localize("vtta-tokenizer.label.Wildcard")})`;
+      this.Token = new View(this, game.settings.get(CONSTANTS.MODULE_ID, "token-size"), tokenView);
+      this._loadTokenImageToTokenView();
+    } else {
+      this.Token = new View(this, game.settings.get(CONSTANTS.MODULE_ID, "token-size"), tokenView);
+      this._loadTokenImageToTokenView();
+    }
+
+    this._initAvatar(this.tokenOptions.avatarFilename);
+  }
+
+}
+
+Hooks.on("renderTokenizer", (app) => {
+  window.addEventListener("paste", async (e) => {
+    game.canvas.layers.forEach((layer) => {
+      layer._copy = [];
+    });
+    e.stopPropagation();
+    app.pasteImage(e);
+  });
+  window.addEventListener("drop", async (e) => {
+    e.stopPropagation();
+    app.pasteImage(e);
+  });
+  app.element.addEventListener("mousedown", async (e) => {
+    // this handles clearing if the selector pop ups when a non popup is clicked
+    if (!app.activeLayerSelectorElement) return;
+    if (!app.activeLayerSelectorElement.contains(e.target)
+     && !app.lastControlButtonClicked.contains(e.target)
+    ) {
+      e.preventDefault();
+      app.activeLayerSelectorElement.classList.remove("show");
+      app.activeLayerSelectorElement = null;
+      app.lastControlButtonClicked = null;
+    }
+  }, false);
+});

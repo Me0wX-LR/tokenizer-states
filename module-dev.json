@@ -1,0 +1,53 @@
+{
+  "id": "vtta-tokenizer",
+  "name": "vtta-tokenizer",
+  "title": "Tokenizer",
+  "description": "Tiny yet capable in-game token editor",
+  "version": "999.0.0",
+  "download": "",
+  "manifest": "https://raw.githubusercontent.com/MrPrimate/tokenizer/master/module-dev.json",
+  "changelog": "https://github.com/MrPrimate/tokenizer/blob/master/CHANGELOG.md",
+  "compatibility": {
+    "minimum": "13",
+    "verified": 13
+  },
+  "authors": [
+    {
+      "name": "MrPrimate",
+      "email": "jack@mrprimate.co.uk",
+      "url": "https://mrprimate.co.uk",
+      "patreon": "https://www.patreon.com/MrPrimate",
+      "discord": "https://discord.gg/WzPuRuDJVP"
+    },
+    {
+      "name": "Sebastian Will",
+      "email": "vttassets@gmail.com"
+    }
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    },
+    {
+      "lang": "de",
+      "name": "Deutsch",
+      "path": "lang/de.json"
+    },
+    {
+      "lang": "es",
+      "name": "Spanish",
+      "path": "lang/es.json"
+    },
+    {
+      "lang": "ja",
+      "name": "日本語",
+      "path": "lang/ja.json"
+    }
+  ],
+  "esmodules": ["./src/index.js"],
+  "styles": ["./css/default.css", "./css/tokenizer.css"],
+  "packs": [],
+  "url": "https://github.com/mrprimate/tokenizer/"
+}

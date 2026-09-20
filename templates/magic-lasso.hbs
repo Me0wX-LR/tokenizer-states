@@ -1,0 +1,33 @@
+<div class="magic-lasso">
+    <div class="tokenizer description">
+    <section class="window-content">
+        <h1>{{localize "vtta-tokenizer.MagicLasso.title"}}</h1>
+        <p>{{localize "vtta-tokenizer.MagicLasso.description"}} </p>
+        <hr>
+        <div id="magic-lasso-buttons">
+            <div display="flex">
+                <div style="overflow: auto">
+                    <div style="float: left; margin-right: 10px;">Blur radius: </div>
+                    <input id="tokenizer-blur-radius" type="text"/>
+                    <div id="tokenizer-threshold"></div>
+                </div>
+            </div>
+            <hr>
+            <div class="buttons">
+                <button data-action="delete" class="tokenizer ui button" title="{{localize "vtta-tokenizer.MagicLasso.transparent"}}"><i class="fas fa-eye-slash"></i> {{localize "vtta-tokenizer.label.Transparent"}}</button>
+                <button id="lasso-fill" data-action="fill" class="tokenizer ui button" title="{{localize "vtta-tokenizer.MagicLasso.fill"}}" disabled><i class="fas fa-fill-drip"></i> {{localize "vtta-tokenizer.label.Fill"}}</button>
+                <div class="tokenizer">
+                    <input id="magic-lasso-color-selector" type="color" value="#00000FF">
+                    <div id="magic-lasso-color-selector-proxy" title="{{localize "vtta-tokenizer.label.FillColor"}}" class="color-picker transparent"></div>
+                </div>
+            </div>
+            <hr>
+            <div class="buttons">
+                <button data-action="ok" class="tokenizer ui button" title="{{localize "vtta-tokenizer.MagicLasso.save"}}"><i class="fas fa-check"></i> {{localize "vtta-tokenizer.label.Apply"}}</button>
+                <button data-action="cancel" class="tokenizer ui button" title="{{localize "vtta-tokenizer.MagicLasso.close"}}"><i class="fas fa-times"></i> {{localize "vtta-tokenizer.label.Cancel"}}</button>
+            </div>
+        </div>
+        
+    </section>
+    </div>
+</div>

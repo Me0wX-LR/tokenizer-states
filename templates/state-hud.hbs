@@ -1,0 +1,25 @@
+<div class="tokenizer-state-hud" id="tokenizer-state-hud">
+    <header class="tokenizer-state-hud-header">
+        <i class="fas fa-masks-theater"></i>
+        <span>{{localize "vtta-tokenizer.states.title"}}</span>
+    </header>
+    <div class="tokenizer-state-hud-grid">
+        {{#each states}}
+        <div class="tokenizer-state-tile {{#if active}}active{{/if}}" data-action="switch" data-state-id="{{id}}" title="{{name}}">
+            <img src="{{preview}}" alt="{{name}}">
+            <span class="tokenizer-state-tile-name">{{name}}</span>
+            {{#if ../canEdit}}
+            <button type="button" class="tokenizer-state-edit" data-action="edit" data-state-id="{{id}}" title="{{localize "vtta-tokenizer.states.edit"}}">
+                <i class="fas fa-pen"></i>
+            </button>
+            {{/if}}
+        </div>
+        {{/each}}
+        {{#if canEdit}}
+        <button type="button" class="tokenizer-state-tile tokenizer-state-add" data-action="add" title="{{localize "vtta-tokenizer.states.add"}}">
+            <i class="fas fa-plus"></i>
+            <span class="tokenizer-state-tile-name">{{localize "vtta-tokenizer.states.add"}}</span>
+        </button>
+        {{/if}}
+    </div>
+</div>

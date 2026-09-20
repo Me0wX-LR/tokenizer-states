@@ -1,0 +1,868 @@
+#tokenizer button .fa-regular,
+#tokenizer button .fas {
+  position: relative;
+}
+
+#tokenizer button.box-button .fa-regular,
+#tokenizer button.box-button .fas {
+  top: -3px;
+}
+
+#tokenizer button .fa-regular::before,
+#tokenizer button .fas::before,
+#tokenizer button .button-fas::before {
+  margin-top: 50%;
+  display: flex;
+}
+
+#tokenizer .blend-control {
+  width: 60px;
+}
+
+#tokenizer div.view > div > canvas {
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  border: thin solid black;
+  margin-bottom: 5px;
+}
+
+#tokenizer > div {
+  display: flex;
+  flex-direction: row;
+  align-items: top;
+}
+
+#tokenizer > div > div {
+  padding: 5px;
+}
+
+#tokenizer div.view-layer-control {
+  font-family: "Roboto", sans-serif;
+  padding: 5px;
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  align-items: center;
+  background-color: lightgray;
+  border-bottom: thin solid darkgray;
+  padding: 5px;
+}
+
+#tokenizer div.view-layer-control canvas {
+  height: 40px;
+  width: 40px;
+  background-color: white;
+}
+
+#tokenizer #stage canvas.isColorPicking {
+  -webkit-box-shadow: -2px 2px 5px -2px rgb(229, 240, 162, 0.75);
+  -moz-box-shadow: -2px 2px 5px -2px rgb(229, 240, 162, 0.75);
+  box-shadow: -2px 2px 5px -2px rgb(229, 240, 162, 0.75);
+}
+
+#tokenizer div.view-layer-control span {
+  display: none;
+}
+
+#tokenizer div.view-layer-control .section,
+#tokenizer .section {
+  height: 40px;
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  align-items: center;
+  border: thin solid rgb(149, 159, 168);
+  background-color: rgb(194, 194, 194);
+  margin-right: 5px;
+  text-align: center;
+  justify-content: center;
+}
+
+#tokenizer div.view-layer-control .section.number,
+#tokenizer .section.number {
+  width: 21px;
+}
+
+.magic-lasso input[type="color"],
+#tokenizer div.view-layer-control input[type="color"] {
+  display: none;
+}
+
+#tokenizer .filePickerTarget {
+  display: none;
+}
+
+#tokenizer button:disabled.menu-button {
+  -webkit-appearance: none;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
+#tokenizer div.view-layer-control button,
+#tokenizer button.menu-button {
+  padding: 5px;
+  margin: 2px;
+  height: 30px;
+  width: 30px;
+  padding: 0 0.5em;
+  white-space: nowrap;
+  border: thin solid black;
+  border-radius: 2px;
+  display: flex;
+  letter-spacing: .05em;
+  line-height: 28px;
+  -webkit-appearance: none;
+  -webkit-box-shadow: -2px 2px 5px -2px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: -2px 2px 5px -2px rgba(0, 0, 0, 0.75);
+  box-shadow: -2px 2px 5px -2px rgba(0, 0, 0, 0.75);
+}
+
+#tokenizer button.invisible-button {
+  margin: 10px;
+  width: 30px;
+  white-space: nowrap;
+  border: none;
+  display: flex;
+  background-color: rgb(194, 194, 194);
+  box-shadow: none;
+  outline: none;
+}
+
+#tokenizer button.invisible-button:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+#tokenizer button.menu-button.text-button {
+  width: 100%;
+}
+
+#tokenizer select {
+  border: thin solid black;
+  height: 30px;
+  width: 255px;
+  padding: 5px;
+  margin: 5px;
+  -webkit-box-shadow: -2px 2px 5px -2px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: -2px 2px 5px -2px rgba(0, 0, 0, 0.75);
+  box-shadow: -2px 2px 5px -2px rgba(0, 0, 0, 0.75);
+}
+
+/* Move up/down control section */
+#tokenizer div.view-layer-control .section.move-control {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#tokenizer div.view-layer-control .section.move-control button {
+  border-radius: 4px;
+  height: 15px;
+  width: 30px;
+  min-height: 15px;
+}
+
+#tokenizer div.view-layer-control .section.move-control button .fas {
+  position: relative;
+}
+
+#tokenizer div.view-layer-control .section.move-control button.move-up {
+  margin-bottom: 0px;
+  padding-bottom: 0px;
+  padding: 5px;
+  display: block;
+}
+#tokenizer div.view-layer-control .section.move-control button.move-up .fas {
+  top: -11px;
+}
+
+#tokenizer div.view-layer-control .section.move-control button.move-down {
+  margin-top: 2px;
+  padding-top: 2px;
+  padding: unset;
+  display: block;
+}
+#tokenizer div.view-layer-control .section.move-control button.move-down .fas {
+  top: -8px;
+}
+
+#tokenizer div.view-layer-control button.delete-control {
+  background-color: red;
+  color: white;
+}
+
+#tokenizer div.view-layer-control button.delete-control:disabled {
+  background-color: rgb(255, 124, 124);
+}
+
+#tokenizer div.view-layer-control button:disabled {
+  -webkit-appearance: none;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
+.magic-lasso .color-picker,
+#tokenizer div.view-layer-control .color-picker {
+  border-radius: 100%;
+  border: thin solid black;
+  height: 25px;
+  width: 25px;
+  padding: 5px;
+  margin: 5px;
+  border: thin solid rgba(0, 0, 0, 0.486);
+
+  -webkit-appearance: none;
+  -webkit-box-shadow: -2px 2px 5px -2px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: -2px 2px 5px -2px rgba(0, 0, 0, 0.75);
+  box-shadow: -2px 2px 5px -2px rgba(0, 0, 0, 0.75);
+}
+
+.magic-lasso .color-picker.transparent,
+#tokenizer div.view-layer-control .color-picker.transparent {
+  /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#fff9f9+0,d8e1e7+50,b5c6d0+51,f7f7f7+100 */
+  background: rgb(255, 249, 249); /* Old browsers */
+  background: -moz-linear-gradient(
+    -45deg,
+    rgba(255, 249, 249, 1) 0%,
+    rgba(216, 225, 231, 1) 50%,
+    rgba(181, 198, 208, 1) 51%,
+    rgba(247, 247, 247, 1) 100%
+  ); /* FF3.6-15 */
+  background: -webkit-linear-gradient(
+    -45deg,
+    rgba(255, 249, 249, 1) 0%,
+    rgba(216, 225, 231, 1) 50%,
+    rgba(181, 198, 208, 1) 51%,
+    rgba(247, 247, 247, 1) 100%
+  ); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 249, 249, 1) 0%,
+    rgba(216, 225, 231, 1) 50%,
+    rgba(181, 198, 208, 1) 51%,
+    rgba(247, 247, 247, 1) 100%
+  ); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fff9f9', endColorstr='#f7f7f7',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+}
+
+#tokenizer div.view-layer-control button.active {
+  /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#e6f0a3+0,d2e638+50,c3d825+51,dbf043+100;Green+Gloss+%232 */
+  background: hsl(68, 72%, 79%); /* Old browsers */
+  background: -moz-linear-gradient(
+    -45deg,
+    rgba(230, 240, 163, 1) 0%,
+    rgba(210, 230, 56, 1) 50%,
+    rgba(195, 216, 37, 1) 51%,
+    rgba(219, 240, 67, 1) 100%
+  ); /* FF3.6-15 */
+  background: -webkit-linear-gradient(
+    -45deg,
+    rgba(230, 240, 163, 1) 0%,
+    rgba(210, 230, 56, 1) 50%,
+    rgba(195, 216, 37, 1) 51%,
+    rgba(219, 240, 67, 1) 100%
+  ); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(
+    135deg,
+    rgba(230, 240, 163, 1) 0%,
+    rgba(210, 230, 56, 1) 50%,
+    rgba(195, 216, 37, 1) 51%,
+    rgba(219, 240, 67, 1) 100%
+  ); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e6f0a3', endColorstr='#dbf043',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+}
+
+#tokenizer div.menu {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  background-color: lightgray;
+  padding: 5px;
+  margin-top: 5px;
+}
+
+#tokenizer div.section {
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  align-items: center;
+  background-color: rgb(194, 194, 194);
+  border: thin solid rgb(149, 159, 168);
+}
+
+#tokenizer div.section div.title {
+  font-weight: normal;
+}
+
+#tokenizer div.section div.content {
+  display: flex;
+  flex-direction: row;
+}
+
+#tokenizer div.footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#tokenizer div.footer-start {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#tokenizer div.footer-end {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+#tokenizer div.footer button.ok-button {
+  width: 150px;
+  height: 40px;
+}
+
+#paste-toggle {
+  width: 100% !important;
+  line-height: 1px;
+}
+
+.imagebrowser .imageresult {
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.imagebrowser .imageresult:hover {
+  opacity: 50%;
+}
+
+.imagebrowser .imageresult img {
+  object-fit: contain;
+  border: none;
+  margin: 2px;
+}
+
+
+.tokenizer label {
+  display: block;
+  padding-left: 15px;
+  text-indent: -15px;
+}
+
+.tokenizer input[type=checkbox] {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin: 0;
+  vertical-align: bottom;
+  position: relative;
+  top: 2px;
+  *overflow: hidden;
+}
+
+.tokenizer .import-invalid {
+  display: none;
+}
+
+.tokenizer .import-hidden {
+  visibility: hidden;
+}
+
+.tokenizer .import-progress {
+  background-color: #f1f1f1;
+  margin: 5px 0;
+  width: 100%;
+}
+
+.tokenizer .import-progress .import-progress-bar {
+  max-width: 100%;
+  height: 24px;
+  background-color: green;
+  text-align: center;
+}
+
+.tokenizer .import-progress .import-progress-bar span {
+  white-space: nowrap;
+  line-height: 24px;
+}
+
+.tokenizer .tokenizer-overlay {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.tokenizer .tokenizer-working {
+  color: white;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 135px;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+#tokenizer .hidden {
+  display: none;
+}
+
+/* The actual popup */
+#tokenizer .popup {
+  box-sizing: border-box;
+  user-select: none;
+  padding: 3px;
+  border: 1px solid #000;
+  border-radius: 3px;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  color: #c9c7b8;
+  text-align: left;
+  z-index: 1;
+  display: grid;
+  position: absolute;
+  visibility: hidden;
+}
+
+#tokenizer .popup hr {
+  border-top: 1px solid rgb(94, 0, 0);
+  border-top-color: rgb(94, 0, 0);
+  border-bottom-color: rgb(94, 0, 0);
+  margin: 0.3em 0;
+  height: 2px;
+  color: rgb(231, 209, 177);
+  border-left-color: rgb(231, 209, 177);
+  border-right-color: rgb(231, 209, 177);
+  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgb(231, 209, 177) 50%, rgba(0, 0, 0, 0) 100%);
+}
+
+#tokenizer select.blend-control-selector {
+  color: #c9c7b8;
+  -webkit-appearance: none;
+}
+
+#tokenizer option,
+#tokenizer optgroup {
+  color: rgb(0, 0, 0);
+  -webkit-appearance: none;
+}
+
+/* Popup arrow */
+#tokenizer .popup::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 13%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #000 transparent;
+}
+
+/* Toggle this class - hide and show the popup */
+#tokenizer .popup .show {
+  visibility: visible;
+}
+
+#tokenizer .show {
+  visibility: visible;
+}
+
+
+.masker {
+  background-color: #f5f7e8;
+  z-index: 10000;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.masker canvas {
+  max-width: 100vw;
+  max-height: 100vh;
+  margin-left: auto;
+  display: block;
+  margin-right: auto;
+}
+.masker .description {
+  position: absolute;
+  width: 20vw;
+  border: thin solid #8d2702;
+  bottom: 5px;
+  right: 5px;
+}
+.masker .description section.window-content {
+  background-color: #ccc;
+  padding: 5px !important;
+  color: #000;
+}
+.masker .description section.window-content h1 {
+  margin-top: 0;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #000;
+}
+.masker .description section.window-content .buttons {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -ms-flex-pack: distribute;
+      justify-content: space-around;
+}
+.masker .description section.window-content .buttons button {
+  max-width: 50% !important;
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  -ms-flex-preferred-size: 40%;
+      flex-basis: 40%;
+}
+
+
+.tokenizer .title {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.tokenizer .title-element:nth-child(1) {
+  order: 0;
+  flex: 0 1 auto;
+  align-self: auto;
+}
+
+.tokenizer .title-element:nth-child(2) {
+  order: 0;
+  flex: 1 0 auto;
+  align-self: auto;
+  justify-content: flex-end;
+  display: flex;
+  margin: auto;
+  gap: 2px;
+}
+
+.tokenizer .box-button-box {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.tokenizer .box-button {
+  align-items: center;
+  background: rgb(94, 0, 0);
+  border-radius: 2px;
+  border: none;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.3), inset 0 0 0 2px hsla(0,0%,100%,.2);
+  box-sizing: border-box;
+  color: rgb(255, 255, 255);
+  cursor: pointer;
+  display: flex;
+  flex: 0;
+  font-family: var(--sans-serif);
+  font-size: 10px;
+  font-weight: 500;
+  height: 2em;
+  justify-content: center;
+  letter-spacing: 0.5px;
+  line-height: 28px;
+  margin: 0;
+  min-height: 1.5em;
+  padding: 0 0.5em;
+  text-rendering: optimizeLegibility;
+  text-transform: uppercase;
+  text-decoration-line: none;
+  text-decoration-style: solid;
+  text-decoration-thickness: auto;
+  user-select: none;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.tokenizer .box-button.deselected {
+  text-decoration-style: dotted;
+  color: rgb(94, 0, 0);
+  background: rgb(255, 255, 255);
+}
+
+.tokenizer .popup-selector {
+  display: flex;
+}
+
+.tokenizer button.popup-button {
+  background: rgb(194, 194, 194);
+}
+
+.tokenizer .popup-selector button.popup-choice {
+  background: rgb(194, 194, 194);
+  font-size: 20px;
+  text-align: center;
+  justify-content: center;
+}
+
+.tokenizer .popup-input {
+  background: rgb(194, 194, 194);
+  font-size: 20px;
+  text-align: center;
+  justify-content: center;
+  width: 50px;
+}
+
+.tokenizer div.basic-control {
+  display: flex;
+}
+
+.magic-lasso #threshold {
+  width: 95px;
+  float: left;
+}
+
+.magic-lasso .add-mode {
+  cursor: copy !important;
+}
+
+.magic-lasso {
+  background-color: #f5f7e8;
+  z-index: 10000;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.magic-lasso canvas {
+  max-width: 100vw;
+  max-height: 100vh;
+  margin-left: auto;
+  display: block;
+  margin-right: auto;
+  position: absolute;
+}
+.magic-lasso .description {
+  position: absolute;
+  width: 20vw;
+  border: thin solid #8d2702;
+  bottom: 5px;
+  right: 5px;
+}
+.magic-lasso .description section.window-content {
+  background-color: #ccc;
+  padding: 5px !important;
+  color: #000;
+}
+.magic-lasso .description section.window-content h1 {
+  margin-top: 0;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #000;
+}
+.magic-lasso .description section.window-content .buttons {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -ms-flex-pack: distribute;
+      justify-content: space-around;
+}
+.magic-lasso .description section.window-content .buttons button {
+  max-width: 50% !important;
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  -ms-flex-preferred-size: 40%;
+      flex-basis: 40%;
+}
+
+.magic-lasso #tokenizer-blur-radius {
+  width: 30px;
+  float: left;
+  margin-right: 10px
+}
+
+div.magic-lasso-wrapper {
+  position: relative;
+}
+
+.tokenizer div.basic-quick-token-control {
+  display: flex;
+}
+
+.tokenizer div.title-buttons {
+  order: 0;
+  flex: 1 0 auto;
+  align-self: auto;
+  display: flex;
+  margin: auto;
+  gap: 2px;
+  justify-content: flex-end;
+}
+
+.tokenizer hr.tokenizer-hr {
+  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgb(231, 209, 177) 50%, rgba(0, 0, 0, 0) 100%);
+  background: rgb(94, 0, 0);
+  border-bottom-color: rgb(94, 0, 0);
+  border-left-color: rgb(231, 209, 177);
+  border-right-color: rgb(231, 209, 177);
+  border-top-color: rgb(94, 0, 0);
+  border-top: 1px solid rgb(94, 0, 0);
+  color: rgb(231, 209, 177);
+  margin: 0.3em 0;
+  margin: 5px;
+  padding: 0;
+  user-select: none;
+  height: 2px;
+}
+
+#tokenizer .tokenizer-states-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  background: rgb(194, 194, 194);
+  border: thin solid rgb(149, 159, 168);
+}
+
+#tokenizer .tokenizer-states-bar label {
+  display: block;
+  padding-left: 0;
+  text-indent: 0;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+#tokenizer select.tokenizer-state-select {
+  width: 220px;
+  margin: 0;
+}
+
+#tokenizer .tokenizer-states-bar .box-button {
+  width: auto;
+  flex: 0 0 auto;
+}
+
+#tokenizer .tokenizer-states-bar .box-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+#tokenizer .tokenizer-states-hint {
+  margin: 6px 8px 8px;
+  font-size: 12px;
+  color: #333;
+}
+
+.tokenizer-state-hud {
+  pointer-events: all;
+  min-width: 280px;
+  max-width: 360px;
+  padding: 8px;
+  border: 1px solid #000;
+  border-radius: 6px;
+  background: rgba(20, 20, 20, 0.92);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  color: #c9c7b8;
+  backdrop-filter: blur(4px);
+}
+
+.tokenizer-state-hud-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.tokenizer-state-hud-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(80px, 1fr));
+  gap: 8px;
+}
+
+.tokenizer-state-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 6px;
+  border: 2px solid rgba(201, 199, 184, 0.25);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.tokenizer-state-tile img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border: none;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 4px;
+}
+
+.tokenizer-state-tile-name {
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  text-align: center;
+}
+
+.tokenizer-state-tile.active {
+  border-color: rgb(231, 209, 177);
+  box-shadow: 0 0 0 1px rgb(94, 0, 0), 0 0 10px rgba(231, 209, 177, 0.35);
+}
+
+.tokenizer-state-tile:hover {
+  border-color: #fff;
+}
+
+.tokenizer-state-edit {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #c9c7b8;
+  cursor: pointer;
+}
+
+.tokenizer-state-add {
+  min-height: 110px;
+  justify-content: center;
+}
+
+.tokenizer-state-add i {
+  font-size: 28px;
+}
